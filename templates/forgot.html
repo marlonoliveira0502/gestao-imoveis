@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esqueci a Senha – Gestão de Imóveis</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: white; border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .logo { text-align: center; margin-bottom: 24px; }
+  .logo .icon { font-size: 2.2rem; }
+  .logo h1 { font-size: 1.2rem; font-weight: 700; color: #1e3a5f; margin-top: 8px; }
+  .logo p { font-size: .82rem; color: #64748b; margin-top: 4px; }
+  .info { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px 14px; font-size: .85rem; color: #0369a1; margin-bottom: 18px; }
+  .btn { width: 100%; margin-top: 18px; padding: 11px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: .95rem; font-weight: 700; cursor: pointer; transition: .15s; }
+  .btn:hover { background: #1d4ed8; }
+  .error { background: #fee2e2; color: #b91c1c; border-radius: 8px; padding: 10px 13px; font-size: .83rem; margin-top: 14px; }
+  .success { background: #dcfce7; color: #15803d; border-radius: 8px; padding: 12px 14px; font-size: .85rem; margin-top: 14px; }
+  .back { text-align: center; margin-top: 18px; font-size: .82rem; }
+  .back a { color: #2563eb; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="icon">📧</div>
+    <h1>Recuperar Senha</h1>
+    <p>Gestão de Imóveis · Invest Imobiliária</p>
+  </div>
+
+  {% if msg %}
+    <div class="success">✅ {{ msg }}</div>
+    <div class="back" style="margin-top:20px"><a href="/login">← Voltar ao login</a></div>
+  {% else %}
+    <div class="info">
+      Um link de recuperação será enviado para <strong>marllonmba@gmail.com</strong>.
+    </div>
+    <form method="POST">
+      {% if erro %}
+      <div class="error">⚠️ {{ erro }}</div>
+      {% endif %}
+      <button class="btn" type="submit">📧 Enviar link de recuperação</button>
+    </form>
+    <div class="back"><a href="/login">← Voltar ao login</a></div>
+  {% endif %}
+</div>
+</body>
+</html>

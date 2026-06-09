@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Imóveis</title>
+<style>
+  :root{--bg:#f0f2f5;--card:#fff;--primary:#2563eb;--primary-dark:#1d4ed8;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  header{background:var(--primary);color:white;padding:14px 22px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  header h1{font-size:1.15rem;font-weight:700;}
+  header .ml{margin-left:auto;display:flex;gap:8px;align-items:center;}
+  nav{background:#1e40af;display:flex;gap:2px;padding:0 22px;overflow-x:auto;}
+  nav button{background:none;border:none;color:rgba(255,255,255,.75);padding:11px 16px;cursor:pointer;font-size:.875rem;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s;}
+  nav button:hover{color:white;}
+  nav button.active{color:white;border-bottom-color:white;font-weight:600;}
+  main{padding:22px;max-width:1200px;margin:0 auto;}
+  .page{display:none;}.page.active{display:block;}
+  .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:18px;}
+  .card-title{font-size:.95rem;font-weight:700;margin-bottom:14px;}
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;}
+  .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+  .stat-card{background:var(--card);border-radius:var(--radius);padding:18px;border:1px solid var(--border);}
+  .stat-label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  .stat-value{font-size:1.5rem;font-weight:700;}
+  .stat-value.green{color:var(--success);}.stat-value.red{color:var(--danger);}.stat-value.blue{color:var(--primary);}
+  label{display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;color:var(--muted);}
+  input,select,textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:.875rem;background:white;color:var(--text);transition:.2s;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+  .form-group{margin-bottom:12px;}
+  .btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border:none;border-radius:7px;font-size:.845rem;font-weight:600;cursor:pointer;transition:.15s;}
+  .btn-primary{background:var(--primary);color:white;}.btn-primary:hover{background:var(--primary-dark);}
+  .btn-danger{background:var(--danger);color:white;}.btn-outline{background:white;color:var(--primary);border:1px solid var(--primary);}
+  .btn-success{background:var(--success);color:white;}
+  .btn-sm{padding:4px 9px;font-size:.78rem;}
+  table{width:100%;border-collapse:collapse;font-size:.845rem;}
+  th{background:var(--bg);padding:9px 11px;text-align:left;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:2px solid var(--border);}
+  td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}tr:hover td{background:#f8fafc;}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.73rem;font-weight:700;}
+  .badge-green{background:#dcfce7;color:#15803d;}.badge-red{background:#fee2e2;color:#b91c1c;}
+  .badge-blue{background:#dbeafe;color:#1d4ed8;}.badge-orange{background:#ffedd5;color:#c2410c;}
+  .badge-gray{background:#f1f5f9;color:#64748b;}
+  .actions{display:flex;gap:5px;}
+  .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .section-header h2{font-size:1.05rem;font-weight:700;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:16px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:white;border-radius:var(--radius);padding:22px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  .modal-title{font-size:1rem;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+  .empty-state{text-align:center;padding:36px 16px;color:var(--muted);}
+  .empty-state .icon{font-size:2.2rem;margin-bottom:8px;}
+  .filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;}
+  .filter-bar .form-group{margin-bottom:0;min-width:140px;}
+  .sync-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:14px 16px;margin-bottom:16px;}
+  .sync-log{background:#0f172a;color:#94a3b8;border-radius:6px;padding:12px;font-size:.8rem;font-family:monospace;max-height:200px;overflow-y:auto;margin-top:10px;white-space:pre-wrap;}
+  .sync-log .ok{color:#4ade80;}.sync-log .err{color:#f87171;}
+  @media(max-width:600px){main{padding:10px;}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}nav button{padding:9px 11px;font-size:.8rem;}}
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.4rem">🏢</span>
+  <div><h1>Gestão de Imóveis</h1><span style="font-size:.78rem;opacity:.8">Manuel Marlon · Invest Imobiliária</span></div>
+  <div class="ml">
+    <button class="btn btn-outline" onclick="openModal('modal-senha')" style="background:white;font-size:.8rem;">🔑 Alterar Senha</button>
+    <a href="/logout" class="btn btn-outline" style="background:white;font-size:.8rem;text-decoration:none;">Sair</a>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+  <button onclick="showPage('unidades',this)">🏠 Unidades</button>
+  <button onclick="showPage('inquilinos',this)">👤 Inquilinos</button>
+  <button onclick="showPage('contratos',this)">📄 Contratos</button>
+  <button onclick="showPage('pagamentos',this)">💰 Pagamentos</button>
+  <button onclick="showPage('relatorios',this)">📈 Relatórios</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div><h2 style="font-size:1.1rem;font-weight:700">Visão Geral</h2><p id="dash-periodo" style="color:var(--muted);font-size:.875rem"></p></div>
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <div class="form-group"><label>Ano</label><select id="dash-ano" onchange="loadDashboard()" style="width:90px"></select></div>
+      <div class="form-group"><label>Mês</label><select id="dash-mes" onchange="loadDashboard()" style="width:140px">
+        <option value="">Ano completo</option>
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select></div>
+    </div>
+  </div>
+  <div class="grid-4" id="dash-stats"></div>
+  <div id="dash-anual" style="margin-top:16px;display:none;"></div>
+  <div class="card" id="dash-alertas" style="margin-top:16px;"></div>
+</div>
+
+<!-- UNIDADES -->
+<div id="page-unidades" class="page">
+  <div class="section-header"><h2>🏠 Unidades</h2><button class="btn btn-primary" onclick="openModal('modal-unidade','')">+ Nova Unidade</button></div>
+  <div class="card" style="padding:0;overflow:hidden;"><table><thead><tr><th>Código</th><th>Tipo</th><th>Descrição</th><th>Aluguel Base</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tb-unidades"></tbody></table></div>
+</div>
+
+<!-- INQUILINOS -->
+<div id="page-inquilinos" class="page">
+  <div class="section-header"><h2>👤 Inquilinos</h2><button class="btn btn-primary" onclick="openModal('modal-inquilino','')">+ Novo Inquilino</button></div>
+  <div class="card" style="padding:0;overflow:hidden;"><table><thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead><tbody id="tb-inquilinos"></tbody></table></div>
+</div>
+
+<!-- CONTRATOS -->
+<div id="page-contratos" class="page">
+  <div class="section-header"><h2>📄 Contratos</h2><button class="btn btn-primary" onclick="openModal('modal-contrato','')">+ Novo Contrato</button></div>
+  <div class="card" style="padding:0;overflow:hidden;"><table><thead><tr><th>Unidade</th><th>Inquilino</th><th>Início</th><th>Fim</th><th>Aluguel</th><th>Tipo</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tb-contratos"></tbody></table></div>
+</div>
+
+<!-- PAGAMENTOS -->
+<div id="page-pagamentos" class="page">
+  <div class="section-header"><h2>💰 Pagamentos</h2><button class="btn btn-primary" onclick="openModal('modal-pagamento','')">+ Registrar</button></div>
+  <div class="filter-bar">
+    <div class="form-group"><label>Ano</label><select id="f-ano" onchange="loadPagamentos()"></select></div>
+    <div class="form-group"><label>Mês</label><select id="f-mes" onchange="loadPagamentos()"><option value="">Todos</option>
+      <option value="1">Jan</option><option value="2">Fev</option><option value="3">Mar</option><option value="4">Abr</option>
+      <option value="5">Mai</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Ago</option>
+      <option value="9">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+    </select></div>
+    <div class="form-group"><label>Unidade</label><select id="f-unidade" onchange="loadPagamentos()"><option value="">Todas</option></select></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;"><table><thead><tr><th>Unidade</th><th>Inquilino</th><th>Competência</th><th>Bruto</th><th>Comissão</th><th>Líquido</th><th>Tipo</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tb-pagamentos"></tbody></table></div>
+  <div id="pag-totais" style="margin-top:10px;"></div>
+</div>
+
+<!-- RELATÓRIOS -->
+<div id="page-relatorios" class="page">
+  <h2 style="font-size:1.05rem;font-weight:700;margin-bottom:14px;">📈 Relatórios</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📅 Por Período</div>
+      <div class="form-group"><label>Ano</label><select id="rel-ano"></select></div>
+      <div class="form-group"><label>Mês (opcional)</label><select id="rel-mes"><option value="">Ano inteiro</option>
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select></div>
+      <button class="btn btn-primary" onclick="gerarRelatorio()">Gerar</button>
+    </div>
+    <div class="card">
+      <div class="card-title">🏠 Por Unidade</div>
+      <div class="form-group"><label>Ano</label><select id="rel-ano2"></select></div>
+      <button class="btn btn-primary" onclick="gerarRelatorioUnidade()">Gerar</button>
+    </div>
+  </div>
+  <div id="relatorio-output"></div>
+</div>
+</main>
+
+<!-- MODAIS -->
+<div id="modal-unidade" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-unidade-title">Nova Unidade</div>
+    <input type="hidden" id="u-id">
+    <div class="grid-2">
+      <div class="form-group"><label>Código *</label><input id="u-codigo" placeholder="AP-101"></div>
+      <div class="form-group"><label>Tipo *</label><select id="u-tipo"><option value="apartamento">Apartamento</option><option value="flat">Flat</option></select></div>
+    </div>
+    <div class="form-group"><label>Descrição / Endereço *</label><input id="u-descricao" placeholder="Apto. 101 – Cond. ..."></div>
+    <div class="grid-2">
+      <div class="form-group"><label>Aluguel Base (R$)</label><input id="u-aluguel" type="number" placeholder="2500"></div>
+      <div class="form-group"><label>Área (m²)</label><input id="u-area" type="number" placeholder="65"></div>
+    </div>
+    <div class="form-group"><label>Obs</label><textarea id="u-obs" rows="2"></textarea></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-unidade')">Cancelar</button><button class="btn btn-primary" onclick="salvarUnidade()">Salvar</button></div>
+  </div>
+</div>
+
+<div id="modal-inquilino" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-inquilino-title">Novo Inquilino</div>
+    <input type="hidden" id="i-id">
+    <div class="form-group"><label>Nome *</label><input id="i-nome" placeholder="João Silva"></div>
+    <div class="grid-2">
+      <div class="form-group"><label>CPF/CNPJ</label><input id="i-cpf" placeholder="000.000.000-00"></div>
+      <div class="form-group"><label>Telefone</label><input id="i-tel" placeholder="(11) 99999-9999"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input id="i-email" type="email"></div>
+    <div class="form-group"><label>Obs</label><textarea id="i-obs" rows="2"></textarea></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-inquilino')">Cancelar</button><button class="btn btn-primary" onclick="salvarInquilino()">Salvar</button></div>
+  </div>
+</div>
+
+<div id="modal-contrato" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-contrato-title">Novo Contrato</div>
+    <input type="hidden" id="c-id">
+    <div class="grid-2">
+      <div class="form-group"><label>Unidade *</label><select id="c-unidade"></select></div>
+      <div class="form-group"><label>Inquilino *</label><select id="c-inquilino"></select></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>Tipo *</label><select id="c-tipo"><option value="novo">Novo contrato</option><option value="renovacao">Renovação</option></select></div>
+      <div class="form-group"><label>Valor Mensal (R$)</label><input id="c-valor" type="number" placeholder="2500"></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>Início *</label><input id="c-inicio" type="date"></div>
+      <div class="form-group"><label>Fim *</label><input id="c-fim" type="date"></div>
+    </div>
+    <div class="form-group"><label>Obs</label><textarea id="c-obs" rows="2"></textarea></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-contrato')">Cancelar</button><button class="btn btn-primary" onclick="salvarContrato()">Salvar</button></div>
+  </div>
+</div>
+
+<div id="modal-pagamento" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-pagamento-title">Registrar Pagamento</div>
+    <input type="hidden" id="p-id">
+    <div class="form-group"><label>Contrato *</label><select id="p-contrato"></select></div>
+    <div class="grid-2">
+      <div class="form-group"><label>Ano *</label><input id="p-ano" type="number" placeholder="2026"></div>
+      <div class="form-group"><label>Mês *</label><select id="p-mes">
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>Valor Bruto (R$) *</label><input id="p-bruto" type="number" step="0.01" oninput="calcComissao()"></div>
+      <div class="form-group"><label>Tipo Comissão *</label><select id="p-tipo" oninput="calcComissao()">
+        <option value="mensal">Mensal (10%)</option>
+        <option value="primeiro_novo">1º Mês Novo (100%)</option>
+        <option value="primeiro_renovacao">1º Mês Renovação (50%)</option>
+        <option value="isento">Isento (0%)</option>
+      </select></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>Comissão (R$)</label><input id="p-comissao" type="number" step="0.01" oninput="calcLiquido()"></div>
+      <div class="form-group"><label>Líquido p/ Você (R$)</label><input id="p-liquido" type="number" step="0.01" readonly style="background:#f8fafc"></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>Data Pagamento</label><input id="p-data" type="date"></div>
+      <div class="form-group"><label>Status</label><select id="p-status"><option value="pago">Pago</option><option value="pendente">Pendente</option><option value="atraso">Em Atraso</option></select></div>
+    </div>
+    <div class="form-group"><label>Obs</label><textarea id="p-obs" rows="2"></textarea></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-pagamento')">Cancelar</button><button class="btn btn-primary" onclick="salvarPagamento()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal alterar senha -->
+<div id="modal-senha" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">🔑 Alterar Senha</div>
+    <div class="form-group"><label>Senha Atual *</label><input type="password" id="s-atual" placeholder="••••••••"></div>
+    <div class="form-group"><label>Nova Senha *</label><input type="password" id="s-nova" placeholder="Mínimo 4 caracteres"></div>
+    <div class="form-group"><label>Confirmar Nova Senha *</label><input type="password" id="s-conf" placeholder="Repita a nova senha"></div>
+    <div id="s-msg" style="display:none;padding:9px 13px;border-radius:7px;font-size:.85rem;margin-top:8px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-senha')">Cancelar</button>
+      <button class="btn btn-primary" onclick="alterarSenha()">Salvar Nova Senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal sincronização -->
+<div id="modal-sync" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">🔄 Sincronizar com ImoGestão</div>
+    <div class="sync-box">
+      <p style="font-size:.875rem;margin-bottom:10px;">Busca automaticamente os demonstrativos de repasse e os comprovantes de IR do site da Invest Imobiliária e atualiza os pagamentos.</p>
+      <div id="sync-status" style="font-size:.85rem;color:var(--muted);">Pronto para sincronizar.</div>
+      <div id="sync-log-box" class="sync-log" style="display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-sync')" id="btn-fechar-sync">Fechar</button>
+      <button class="btn btn-primary" onclick="iniciarSync()" id="btn-iniciar-sync">▶ Iniciar Sincronização</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const MESES=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function moeda(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function today(){return new Date().toISOString().slice(0,10);}
+
+async function api(method,url,body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(url,opts);
+  return r.json();
+}
+
+// ─── MODAL ──────────────────────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay'))closeModal(e.target.id);});
+
+// ─── NAV ────────────────────────────────────────────────────────────────────
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  const loaders={dashboard:loadDashboard,unidades:loadUnidades,inquilinos:loadInquilinos,contratos:loadContratos,pagamentos:loadPagamentos,relatorios:loadRelatorioOpts};
+  if(loaders[name]) loaders[name]();
+}
+
+// ─── ANOS SELECT ─────────────────────────────────────────────────────────────
+function fillAnos(ids,def){
+  const now=new Date().getFullYear();
+  const anos=[2024,2025,2026,now].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>b-a);
+  ids.forEach(id=>{const s=document.getElementById(id);if(!s)return;s.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join('');s.value=def||now;});
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  const now=new Date();
+  const ano=document.getElementById('dash-ano')?.value||now.getFullYear();
+  const mes=document.getElementById('dash-mes')?.value||'';
+  const anoCompleto=!mes;
+
+  document.getElementById('dash-periodo').textContent=anoCompleto?`Ano completo ${ano}`:`${MESES[+mes]} de ${ano}`;
+  document.getElementById('dash-anual').style.display='none';
+
+  if(anoCompleto){
+    // Buscar resumo anual via /api/relatorio
+    const rel=await api('GET',`/api/relatorio?ano=${ano}`);
+    const pm=rel.por_mes||[];
+    const tB=pm.reduce((s,r)=>s+r.bruto,0);
+    const tC=pm.reduce((s,r)=>s+r.comissao,0);
+    const tL=pm.reduce((s,r)=>s+r.liquido,0);
+    // Buscar unidades/contratos ativos via dashboard (qualquer mês)
+    const d=await api('GET',`/api/dashboard?ano=${ano}&mes=${now.getMonth()+1}`);
+    document.getElementById('dash-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-label">Unidades Ativas</div><div class="stat-value blue">${d.contratos_ativos}/${d.total_unidades}</div></div>
+      <div class="stat-card"><div class="stat-label">Receita Bruta (ano)</div><div class="stat-value">${moeda(tB)}</div></div>
+      <div class="stat-card"><div class="stat-label">Comissão Imob. (ano)</div><div class="stat-value red">${moeda(tC)}</div></div>
+      <div class="stat-card"><div class="stat-label">Líquido p/ Você (ano)</div><div class="stat-value green">${moeda(tL)}</div></div>`;
+    // Tabela mensal
+    const anualBox=document.getElementById('dash-anual');
+    anualBox.style.display='block';
+    anualBox.innerHTML=`<div class="card" style="padding:0;overflow:hidden;">
+      <div class="card-title" style="padding:14px 18px 0">📅 Receitas mensais — ${ano}</div>
+      <table><thead><tr><th>Mês</th><th>Bruto</th><th>Comissão</th><th>Líquido</th></tr></thead>
+      <tbody>${pm.map(r=>`<tr>
+        <td>${MESES[r.mes]}</td>
+        <td>${moeda(r.bruto)}</td>
+        <td style="color:var(--danger)">${moeda(r.comissao)}</td>
+        <td style="color:var(--success)"><strong>${moeda(r.liquido)}</strong></td>
+      </tr>`).join('')}
+      <tr style="background:var(--bg);font-weight:700">
+        <td>TOTAL</td><td>${moeda(tB)}</td><td style="color:var(--danger)">${moeda(tC)}</td><td style="color:var(--success)">${moeda(tL)}</td>
+      </tr></tbody></table></div>`;
+    // Alertas
+    const box=document.getElementById('dash-alertas');
+    if(!d.alertas.length){box.innerHTML='<div class="card-title">⚠️ Alertas</div><p style="color:var(--muted);font-size:.875rem">Nenhum alerta 🎉</p>';return;}
+    box.innerHTML='<div class="card-title">⚠️ Contratos próximos do vencimento</div>'+d.alertas.map(a=>{
+      const dias=Math.round((new Date(a.fim)-new Date())/86400000);
+      return`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:.875rem">⚠️ <strong>${a.codigo}</strong> — ${a.nome} — vence em <strong>${dias} dias</strong> (${a.fim})</div>`;
+    }).join('');
+  } else {
+    const d=await api('GET',`/api/dashboard?ano=${ano}&mes=${mes}`);
+    document.getElementById('dash-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-label">Unidades Ativas</div><div class="stat-value blue">${d.contratos_ativos}/${d.total_unidades}</div></div>
+      <div class="stat-card"><div class="stat-label">Receita Bruta (mês)</div><div class="stat-value">${moeda(d.bruto)}</div></div>
+      <div class="stat-card"><div class="stat-label">Comissão Imob. (mês)</div><div class="stat-value red">${moeda(d.comissao)}</div></div>
+      <div class="stat-card"><div class="stat-label">Líquido p/ Você (mês)</div><div class="stat-value green">${moeda(d.liquido)}</div></div>`;
+    const box=document.getElementById('dash-alertas');
+    if(!d.alertas.length){box.innerHTML='<div class="card-title">⚠️ Alertas</div><p style="color:var(--muted);font-size:.875rem">Nenhum alerta 🎉</p>';return;}
+    box.innerHTML='<div class="card-title">⚠️ Contratos próximos do vencimento</div>'+d.alertas.map(a=>{
+      const dias=Math.round((new Date(a.fim)-new Date())/86400000);
+      return`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:.875rem">⚠️ <strong>${a.codigo}</strong> — ${a.nome} — vence em <strong>${dias} dias</strong> (${a.fim})</div>`;
+    }).join('');
+  }
+}
+
+// ─── UNIDADES ────────────────────────────────────────────────────────────────
+let _unidades=[];
+async function loadUnidades(){
+  _unidades=await api('GET','/api/unidades');
+  const tb=document.getElementById('tb-unidades');
+  if(!_unidades.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">🏠</div>Nenhuma unidade cadastrada</div></td></tr>';return;}
+  tb.innerHTML=_unidades.map(u=>`<tr>
+    <td><strong>${u.codigo}</strong></td><td>${u.tipo==='flat'?'Flat':'Apartamento'}</td>
+    <td>${u.descricao}</td><td>${moeda(u.aluguel)}</td>
+    <td><span class="badge badge-blue">–</span></td>
+    <td class="actions"><button class="btn btn-sm btn-outline" onclick="editUnidade(${u.id})">✏️</button><button class="btn btn-sm btn-danger" onclick="delUnidade(${u.id})">🗑</button></td>
+  </tr>`).join('');
+  // popular filtro
+  const f=document.getElementById('f-unidade');
+  if(f) f.innerHTML='<option value="">Todas</option>'+_unidades.map(u=>`<option value="${u.id}">${u.codigo}</option>`).join('');
+}
+function editUnidade(id){const u=_unidades.find(x=>x.id===id);if(!u)return;document.getElementById('modal-unidade-title').textContent='Editar Unidade';document.getElementById('u-id').value=u.id;document.getElementById('u-codigo').value=u.codigo;document.getElementById('u-tipo').value=u.tipo;document.getElementById('u-descricao').value=u.descricao;document.getElementById('u-aluguel').value=u.aluguel;document.getElementById('u-area').value=u.area||'';document.getElementById('u-obs').value=u.obs||'';openModal('modal-unidade');}
+async function salvarUnidade(){const id=document.getElementById('u-id').value;const d={codigo:document.getElementById('u-codigo').value,tipo:document.getElementById('u-tipo').value,descricao:document.getElementById('u-descricao').value,aluguel:+document.getElementById('u-aluguel').value,area:+document.getElementById('u-area').value||0,obs:document.getElementById('u-obs').value};if(!d.codigo||!d.descricao){alert('Preencha campos obrigatórios.');return;}if(id) await api('PUT',`/api/unidades/${id}`,d);else await api('POST','/api/unidades',d);closeModal('modal-unidade');loadUnidades();}
+async function delUnidade(id){if(!confirm('Excluir?'))return;await api('DELETE',`/api/unidades/${id}`);loadUnidades();}
+
+// ─── INQUILINOS ──────────────────────────────────────────────────────────────
+let _inquilinos=[];
+async function loadInquilinos(){
+  _inquilinos=await api('GET','/api/inquilinos');
+  const tb=document.getElementById('tb-inquilinos');
+  if(!_inquilinos.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="icon">👤</div>Nenhum inquilino</div></td></tr>';return;}
+  tb.innerHTML=_inquilinos.map(i=>`<tr><td><strong>${i.nome}</strong></td><td>${i.cpf||'–'}</td><td>${i.tel||'–'}</td><td>${i.email||'–'}</td><td class="actions"><button class="btn btn-sm btn-outline" onclick="editInquilino(${i.id})">✏️</button><button class="btn btn-sm btn-danger" onclick="delInquilino(${i.id})">🗑</button></td></tr>`).join('');
+}
+function editInquilino(id){const i=_inquilinos.find(x=>x.id===id);if(!i)return;document.getElementById('modal-inquilino-title').textContent='Editar Inquilino';document.getElementById('i-id').value=i.id;document.getElementById('i-nome').value=i.nome;document.getElementById('i-cpf').value=i.cpf||'';document.getElementById('i-tel').value=i.tel||'';document.getElementById('i-email').value=i.email||'';document.getElementById('i-obs').value=i.obs||'';openModal('modal-inquilino');}
+async function salvarInquilino(){const id=document.getElementById('i-id').value;const d={nome:document.getElementById('i-nome').value,cpf:document.getElementById('i-cpf').value,tel:document.getElementById('i-tel').value,email:document.getElementById('i-email').value,obs:document.getElementById('i-obs').value};if(!d.nome){alert('Nome obrigatório.');return;}if(id) await api('PUT',`/api/inquilinos/${id}`,d);else await api('POST','/api/inquilinos',d);closeModal('modal-inquilino');loadInquilinos();}
+async function delInquilino(id){if(!confirm('Excluir?'))return;await api('DELETE',`/api/inquilinos/${id}`);loadInquilinos();}
+
+// ─── CONTRATOS ───────────────────────────────────────────────────────────────
+let _contratos=[];
+async function loadContratos(){
+  if(!_unidades.length) await loadUnidades();
+  if(!_inquilinos.length) await loadInquilinos();
+  _contratos=await api('GET','/api/contratos');
+  const tb=document.getElementById('tb-contratos');
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  if(!_contratos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📄</div>Nenhum contrato</div></td></tr>';return;}
+  tb.innerHTML=_contratos.map(c=>{
+    const ini=new Date(c.inicio+'T00:00:00'),fim=new Date(c.fim+'T00:00:00');
+    const st=ini>hoje?'futuro':fim<hoje?'encerrado':'ativo';
+    const badge={ativo:'badge-green',encerrado:'badge-gray',futuro:'badge-blue'}[st];
+    const dias=Math.round((fim-hoje)/86400000);
+    const aviso=st==='ativo'&&dias<=60?`<span class="badge badge-orange">${dias}d</span>`:'';
+    return`<tr><td><strong>${c.unidade_codigo}</strong></td><td>${c.inquilino_nome}</td><td>${c.inicio}</td><td>${c.fim} ${aviso}</td><td>${moeda(c.valor)}</td><td><span class="badge badge-blue">${c.tipo==='renovacao'?'Renovação':'Novo'}</span></td><td><span class="badge ${badge}">${st}</span></td><td class="actions"><button class="btn btn-sm btn-outline" onclick="editContrato(${c.id})">✏️</button><button class="btn btn-sm btn-danger" onclick="delContrato(${c.id})">🗑</button></td></tr>`;
+  }).join('');
+  // popular selects de contrato no modal pagamento
+  const sel=document.getElementById('p-contrato');
+  if(sel) sel.innerHTML=_contratos.map(c=>`<option value="${c.id}">${c.unidade_codigo} – ${c.inquilino_nome}</option>`).join('');
+}
+function editContrato(id){const c=_contratos.find(x=>x.id===id);if(!c)return;document.getElementById('modal-contrato-title').textContent='Editar Contrato';document.getElementById('c-id').value=c.id;document.getElementById('c-unidade').value=c.unidade_id;document.getElementById('c-inquilino').value=c.inquilino_id;document.getElementById('c-tipo').value=c.tipo;document.getElementById('c-valor').value=c.valor;document.getElementById('c-inicio').value=c.inicio;document.getElementById('c-fim').value=c.fim;document.getElementById('c-obs').value=c.obs||'';openModal('modal-contrato');}
+function openNovoContrato(){
+  if(!_unidades.length){alert('Carregue as unidades primeiro.');return;}
+  document.getElementById('modal-contrato-title').textContent='Novo Contrato';
+  document.getElementById('c-id').value='';
+  document.getElementById('c-unidade').innerHTML=_unidades.map(u=>`<option value="${u.id}">${u.codigo}</option>`).join('');
+  document.getElementById('c-inquilino').innerHTML=_inquilinos.map(i=>`<option value="${i.id}">${i.nome}</option>`).join('');
+  document.getElementById('c-inicio').value=today();
+  document.getElementById('c-fim').value='';
+  document.getElementById('c-valor').value='';
+  document.getElementById('c-obs').value='';
+  openModal('modal-contrato');
+}
+document.querySelectorAll('[onclick="openModal(\'modal-contrato\',\'\')"]').forEach(b=>b.onclick=openNovoContrato);
+async function salvarContrato(){const id=document.getElementById('c-id').value;const d={unidade_id:+document.getElementById('c-unidade').value,inquilino_id:+document.getElementById('c-inquilino').value,tipo:document.getElementById('c-tipo').value,valor:+document.getElementById('c-valor').value,inicio:document.getElementById('c-inicio').value,fim:document.getElementById('c-fim').value,obs:document.getElementById('c-obs').value};if(!d.unidade_id||!d.inquilino_id||!d.inicio||!d.fim){alert('Preencha campos obrigatórios.');return;}if(id) await api('PUT',`/api/contratos/${id}`,d);else await api('POST','/api/contratos',d);closeModal('modal-contrato');loadContratos();}
+async function delContrato(id){if(!confirm('Excluir?'))return;await api('DELETE',`/api/contratos/${id}`);loadContratos();}
+
+// ─── PAGAMENTOS ──────────────────────────────────────────────────────────────
+function calcComissao(){const b=+document.getElementById('p-bruto').value||0;const t=document.getElementById('p-tipo').value;let c=0;if(t==='mensal')c=b*.10;else if(t==='primeiro_novo')c=b;else if(t==='primeiro_renovacao')c=b*.50;document.getElementById('p-comissao').value=c.toFixed(2);document.getElementById('p-liquido').value=(b-c).toFixed(2);}
+function calcLiquido(){const b=+document.getElementById('p-bruto').value||0;const c=+document.getElementById('p-comissao').value||0;document.getElementById('p-liquido').value=(b-c).toFixed(2);}
+async function loadPagamentos(){
+  if(!_contratos.length) await loadContratos();
+  const ano=document.getElementById('f-ano')?.value;
+  const mes=document.getElementById('f-mes')?.value;
+  const uid=document.getElementById('f-unidade')?.value;
+  let url=`/api/pagamentos?`;
+  if(ano) url+=`ano=${ano}&`;
+  if(mes) url+=`mes=${mes}&`;
+  if(uid){const cids=_contratos.filter(c=>c.unidade_id===+uid).map(c=>c.id);} // TODO: filter client-side
+  const pags=await api('GET',url);
+  // filter by unidade client-side
+  const filtered=uid?pags.filter(p=>p.unidade_id===+uid):pags;
+  const tb=document.getElementById('tb-pagamentos');
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="icon">💰</div>Nenhum pagamento</div></td></tr>';document.getElementById('pag-totais').innerHTML='';return;}
+  const tipoLabel={'mensal':'Mensal (10%)','primeiro_novo':'1º Mês Novo','primeiro_renovacao':'1º Mês Renov.','isento':'Isento'};
+  tb.innerHTML=filtered.map(p=>{
+    const badge=p.status==='pago'?'badge-green':p.status==='atraso'?'badge-red':'badge-orange';
+    return`<tr><td><strong>${p.unidade_codigo}</strong></td><td>${p.inquilino_nome}</td><td>${MESES[+p.mes]}/${p.ano}</td><td>${moeda(p.bruto)}</td><td style="color:var(--danger)">${moeda(p.comissao)}</td><td style="color:var(--success)">${moeda(p.liquido)}</td><td><span class="badge badge-blue" style="font-size:.7rem">${tipoLabel[p.tipo_comissao]||p.tipo_comissao}</span></td><td><span class="badge ${badge}">${p.status}</span></td><td class="actions"><button class="btn btn-sm btn-outline" onclick="editPagamento(${p.id})">✏️</button><button class="btn btn-sm btn-danger" onclick="delPagamento(${p.id})">🗑</button></td></tr>`;
+  }).join('');
+  const tB=filtered.reduce((s,p)=>s+(+p.bruto),0);
+  const tC=filtered.reduce((s,p)=>s+(+p.comissao),0);
+  const tL=filtered.reduce((s,p)=>s+(+p.liquido),0);
+  document.getElementById('pag-totais').innerHTML=`<div class="card"><div class="grid-3">
+    <div><div class="stat-label">Total Bruto</div><div class="stat-value" style="font-size:1.1rem">${moeda(tB)}</div></div>
+    <div><div class="stat-label">Total Comissão</div><div class="stat-value red" style="font-size:1.1rem">${moeda(tC)}</div></div>
+    <div><div class="stat-label">Total Líquido</div><div class="stat-value green" style="font-size:1.1rem">${moeda(tL)}</div></div>
+  </div></div>`;
+}
+
+let _pagamentos_all=[];
+async function openNovoPagamento(){
+  if(!_contratos.length) await loadContratos();
+  document.getElementById('modal-pagamento-title').textContent='Registrar Pagamento';
+  document.getElementById('p-id').value='';
+  document.getElementById('p-contrato').innerHTML=_contratos.map(c=>`<option value="${c.id}">${c.unidade_codigo} – ${c.inquilino_nome}</option>`).join('');
+  const now=new Date();document.getElementById('p-ano').value=now.getFullYear();document.getElementById('p-mes').value=now.getMonth()+1;
+  document.getElementById('p-bruto').value='';document.getElementById('p-comissao').value='';document.getElementById('p-liquido').value='';
+  document.getElementById('p-tipo').value='mensal';document.getElementById('p-data').value=today();document.getElementById('p-status').value='pago';document.getElementById('p-obs').value='';
+  openModal('modal-pagamento');
+}
+document.querySelectorAll('[onclick="openModal(\'modal-pagamento\',\'\')"]').forEach(b=>b.onclick=openNovoPagamento);
+
+async function editPagamento(id){
+  const pags=await api('GET',`/api/pagamentos`);
+  const p=pags.find(x=>x.id===id);if(!p)return;
+  if(!_contratos.length) await loadContratos();
+  document.getElementById('modal-pagamento-title').textContent='Editar Pagamento';
+  document.getElementById('p-id').value=p.id;
+  document.getElementById('p-contrato').innerHTML=_contratos.map(c=>`<option value="${c.id}">${c.unidade_codigo} – ${c.inquilino_nome}</option>`).join('');
+  document.getElementById('p-contrato').value=p.contrato_id;
+  document.getElementById('p-ano').value=p.ano;document.getElementById('p-mes').value=p.mes;
+  document.getElementById('p-bruto').value=p.bruto;document.getElementById('p-comissao').value=p.comissao;document.getElementById('p-liquido').value=p.liquido;
+  document.getElementById('p-tipo').value=p.tipo_comissao||'mensal';document.getElementById('p-data').value=p.data_pgto||'';
+  document.getElementById('p-status').value=p.status;document.getElementById('p-obs').value=p.obs||'';
+  openModal('modal-pagamento');
+}
+async function salvarPagamento(){
+  const id=document.getElementById('p-id').value;
+  const d={contrato_id:+document.getElementById('p-contrato').value,ano:+document.getElementById('p-ano').value,mes:+document.getElementById('p-mes').value,bruto:+document.getElementById('p-bruto').value,comissao:+document.getElementById('p-comissao').value,liquido:+document.getElementById('p-liquido').value,tipo_comissao:document.getElementById('p-tipo').value,data_pgto:document.getElementById('p-data').value,status:document.getElementById('p-status').value,obs:document.getElementById('p-obs').value};
+  if(!d.contrato_id||!d.ano||!d.mes||!d.bruto){alert('Preencha campos obrigatórios.');return;}
+  if(id) await api('PUT',`/api/pagamentos/${id}`,d);else await api('POST','/api/pagamentos',d);
+  closeModal('modal-pagamento');loadPagamentos();
+}
+async function delPagamento(id){if(!confirm('Excluir?'))return;await api('DELETE',`/api/pagamentos/${id}`);loadPagamentos();}
+
+// ─── RELATÓRIOS ──────────────────────────────────────────────────────────────
+function loadRelatorioOpts(){fillAnos(['rel-ano','rel-ano2'],new Date().getFullYear());}
+async function gerarRelatorio(){
+  const ano=document.getElementById('rel-ano').value;
+  const mes=document.getElementById('rel-mes').value;
+  const d=await api('GET',`/api/relatorio?ano=${ano}&mes=${mes}`);
+  const out=document.getElementById('relatorio-output');
+  const tB=d.por_mes.reduce((s,r)=>s+r.bruto,0),tC=d.por_mes.reduce((s,r)=>s+r.comissao,0),tL=d.por_mes.reduce((s,r)=>s+r.liquido,0);
+  out.innerHTML=`<div class="card"><div class="card-title">📊 ${mes?MESES[+mes]+' / '+ano:'Ano '+ano}</div>
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">Bruto</div><div class="stat-value">${moeda(tB)}</div></div>
+      <div class="stat-card"><div class="stat-label">Comissão</div><div class="stat-value red">${moeda(tC)}</div></div>
+      <div class="stat-card"><div class="stat-label">Líquido</div><div class="stat-value green">${moeda(tL)}</div></div>
+    </div>
+    ${!mes?`<table><thead><tr><th>Mês</th><th>Pgtos</th><th>Bruto</th><th>Comissão</th><th>Líquido</th></tr></thead><tbody>${d.por_mes.map(r=>`<tr><td>${MESES[r.mes]}/${r.ano}</td><td>${r.qtd}</td><td>${moeda(r.bruto)}</td><td>${moeda(r.comissao)}</td><td style="color:var(--success)">${moeda(r.liquido)}</td></tr>`).join('')}</tbody></table>`:''}
+  </div>`;
+}
+async function gerarRelatorioUnidade(){
+  const ano=document.getElementById('rel-ano2').value;
+  const d=await api('GET',`/api/relatorio?ano=${ano}`);
+  const out=document.getElementById('relatorio-output');
+  const tB=d.por_unidade.reduce((s,r)=>s+r.bruto,0),tC=d.por_unidade.reduce((s,r)=>s+r.comissao,0),tL=d.por_unidade.reduce((s,r)=>s+r.liquido,0);
+  out.innerHTML=`<div class="card"><div class="card-title">🏠 Por Unidade — ${ano}</div>
+    <table><thead><tr><th>Unidade</th><th>Tipo</th><th>Meses</th><th>Bruto</th><th>Comissão</th><th>Líquido</th></tr></thead>
+    <tbody>${d.por_unidade.map(r=>`<tr><td><strong>${r.codigo}</strong></td><td>${r.tipo==='flat'?'Flat':'Apt'}</td><td>${r.meses}</td><td>${moeda(r.bruto)}</td><td>${moeda(r.comissao)}</td><td style="color:var(--success)">${moeda(r.liquido)}</td></tr>`).join('')}
+    <tr style="font-weight:700;background:var(--bg)"><td colspan="3">TOTAL</td><td>${moeda(tB)}</td><td>${moeda(tC)}</td><td style="color:var(--success)">${moeda(tL)}</td></tr>
+    </tbody></table></div>`;
+}
+
+// ─── SINCRONIZAÇÃO ───────────────────────────────────────────────────────────
+let syncPoll=null;
+function sincronizar(){openModal('modal-sync');document.getElementById('sync-status').textContent='Pronto para sincronizar.';document.getElementById('sync-log-box').style.display='none';document.getElementById('sync-log-box').textContent='';document.getElementById('btn-iniciar-sync').disabled=false;}
+async function iniciarSync(){
+  document.getElementById('btn-iniciar-sync').disabled=true;
+  document.getElementById('sync-status').textContent='⏳ Sincronizando...';
+  document.getElementById('sync-log-box').style.display='block';
+  document.getElementById('sync-log-box').textContent='';
+  await api('POST','/api/sincronizar');
+  syncPoll=setInterval(async()=>{
+    const s=await api('GET','/api/sincronizar/status');
+    const box=document.getElementById('sync-log-box');
+    box.textContent=s.log.map(l=>{
+      if(l.startsWith('✅'))return`✅ ${l.slice(2)}`;
+      if(l.startsWith('❌'))return`❌ ${l.slice(2)}`;
+      return l;
+    }).join('\n');
+    box.scrollTop=box.scrollHeight;
+    if(!s.rodando){
+      clearInterval(syncPoll);
+      const last=s.log[s.log.length-1]||'';
+      if(last.startsWith('RESULTADO:')){
+        const[,ins,upd,err]=last.split(':');
+        document.getElementById('sync-status').textContent=`✅ Concluído: ${ins} inseridos, ${upd} atualizados, ${err} erros`;
+      } else {
+        document.getElementById('sync-status').textContent='Concluído.';
+      }
+      document.getElementById('btn-iniciar-sync').disabled=false;
+      loadDashboard();
+    }
+  },1500);
+}
+
+// ─── ALTERAR SENHA ───────────────────────────────────────────────────────────
+async function alterarSenha(){
+  const atual=document.getElementById('s-atual').value;
+  const nova=document.getElementById('s-nova').value;
+  const conf=document.getElementById('s-conf').value;
+  const msg=document.getElementById('s-msg');
+  msg.style.display='none';
+  if(!atual||!nova||!conf){msg.style.cssText='display:block;background:#fee2e2;color:#b91c1c;padding:9px 13px;border-radius:7px;font-size:.85rem;margin-top:8px';msg.textContent='Preencha todos os campos.';return;}
+  if(nova!==conf){msg.style.cssText='display:block;background:#fee2e2;color:#b91c1c;padding:9px 13px;border-radius:7px;font-size:.85rem;margin-top:8px';msg.textContent='As senhas não coincidem.';return;}
+  if(nova.length<4){msg.style.cssText='display:block;background:#fee2e2;color:#b91c1c;padding:9px 13px;border-radius:7px;font-size:.85rem;margin-top:8px';msg.textContent='A nova senha deve ter pelo menos 4 caracteres.';return;}
+  const r=await api('POST','/api/alterar-senha',{senha_atual:atual,nova_senha:nova});
+  if(r.erro){msg.style.cssText='display:block;background:#fee2e2;color:#b91c1c;padding:9px 13px;border-radius:7px;font-size:.85rem;margin-top:8px';msg.textContent=r.erro;return;}
+  msg.style.cssText='display:block;background:#dcfce7;color:#15803d;padding:9px 13px;border-radius:7px;font-size:.85rem;margin-top:8px';msg.textContent='✅ Senha alterada com sucesso!';
+  document.getElementById('s-atual').value='';document.getElementById('s-nova').value='';document.getElementById('s-conf').value='';
+  setTimeout(()=>closeModal('modal-senha'),1500);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(async()=>{
+  const now=new Date();
+  fillAnos(['dash-ano','f-ano','rel-ano','rel-ano2'],now.getFullYear());
+  document.getElementById('dash-mes').value='';
+  document.getElementById('f-mes').value='';
+  await loadDashboard();
+  await loadUnidades();
+})();
+</script>
+</body>
+</html>

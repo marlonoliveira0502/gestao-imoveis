@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: gestao-imoveis
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: APP_USER
+        value: marlon
+      - key: APP_PASS
+        value: invest2024
+      - key: IMOB_CPF
+        value: 59711809249
+      - key: IMOB_PASS
+        value: 1Ev5Ew

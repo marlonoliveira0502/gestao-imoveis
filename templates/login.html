@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Imóveis – Login</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: white; border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .logo { text-align: center; margin-bottom: 28px; }
+  .logo .icon { font-size: 2.5rem; }
+  .logo h1 { font-size: 1.3rem; font-weight: 700; color: #1e3a5f; margin-top: 8px; }
+  .logo p { font-size: .85rem; color: #64748b; margin-top: 4px; }
+  label { display: block; font-size: .82rem; font-weight: 600; color: #475569; margin-bottom: 4px; margin-top: 16px; }
+  input { width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: .95rem; transition: .2s; }
+  input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+  .btn { width: 100%; margin-top: 24px; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: .15s; }
+  .btn:hover { background: #1d4ed8; }
+  .error { background: #fee2e2; color: #b91c1c; border-radius: 8px; padding: 10px 14px; font-size: .85rem; margin-top: 16px; }
+  .footer { text-align: center; margin-top: 24px; font-size: .75rem; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="icon">🏢</div>
+    <h1>Gestão de Imóveis</h1>
+    <p>Invest Imobiliária · Marabá/PA</p>
+  </div>
+  <form method="POST">
+    <label>Usuário</label>
+    <input type="text" name="usuario" placeholder="seu usuário" autofocus required>
+    <label>Senha</label>
+    <input type="password" name="senha" placeholder="••••••••" required>
+    {% if error %}
+    <div class="error">⚠️ {{ error }}</div>
+    {% endif %}
+    <button class="btn" type="submit">Entrar</button>
+  </form>
+  <div style="text-align:center;margin-top:16px;font-size:.82rem">
+    <a href="/esqueci-senha" style="color:#2563eb;text-decoration:none;font-weight:600">Esqueci minha senha</a>
+  </div>
+  <div class="footer">Manuel Marlon da Silva Oliveira</div>
+</div>
+</body>
+</html>
